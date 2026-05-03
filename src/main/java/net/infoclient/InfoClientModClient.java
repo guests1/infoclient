@@ -27,14 +27,14 @@ public class InfoClientModClient implements ClientModInitializer {
         openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.infoclient.menu",
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_P,
+                GLFW.GLFW_KEY_M,
                 "category.infoclient"
         ));
 
         toggleHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.infoclient.toggle",
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_F4,
+                GLFW.GLFW_KEY_N,
                 "category.infoclient"
         ));
 
@@ -57,6 +57,6 @@ public class InfoClientModClient implements ClientModInitializer {
             KeyStrokesHud.render(matrices, tickDelta);
         });
 
-        System.out.println("[InfoClient] Cargado! P: Menu | F4: Toggle HUD");
+        System.out.println("[InfoClient] Cargado! M: Menu | N: Toggle HUD");
     }
 }
