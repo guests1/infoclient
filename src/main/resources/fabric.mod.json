@@ -2,26 +2,19 @@
   "schemaVersion": 1,
   "id": "infoclient",
   "version": "${version}",
-
   "name": "InfoClient",
   "description": "HUD, KeyStrokes, AutoClicker y menu de inicio personalizado.",
-  "authors": ["Tu nombre"],
-  "contact": {},
-
+  "authors": ["InfoClient"],
   "license": "MIT",
   "environment": "client",
-  "accessWidener": "infoclient.accesswidener",
-
   "entrypoints": {
     "client": [
       "net.infoclient.InfoClientModClient"
     ]
   },
-
   "mixins": [
     "infoclient.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=0.14.9",
     "fabric": "*",

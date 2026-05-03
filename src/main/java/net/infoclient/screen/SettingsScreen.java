@@ -24,9 +24,9 @@ public class SettingsScreen extends Screen {
 
     @Override
     protected void init() {
-        int panelX = (this.width - PANEL_W) / 2;
+        int panelX = (this.width  - PANEL_W) / 2;
         int panelY = (this.height - PANEL_H) / 2;
-        int col = panelX + PANEL_W / 2;
+        int col    = panelX + PANEL_W / 2;
         int bw = 220, bh = 22, startY = panelY + 60, gap = 30;
 
         this.addDrawableChild(new ButtonWidget(col-bw/2, startY, bw, bh,
@@ -73,7 +73,8 @@ public class SettingsScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.renderBackground(matrices);
-        int px = (this.width - PANEL_W) / 2, py = (this.height - PANEL_H) / 2;
+        int px = (this.width  - PANEL_W) / 2;
+        int py = (this.height - PANEL_H) / 2;
 
         DrawableHelper.fill(matrices, px+4, py+4, px+PANEL_W+4, py+PANEL_H+4, 0x66000000);
         DrawableHelper.fill(matrices, px, py, px+PANEL_W, py+PANEL_H, 0xEE111122);
@@ -83,22 +84,22 @@ public class SettingsScreen extends Screen {
 
         for (int i = 0; i < PANEL_W; i++) {
             float t = (float)i / PANEL_W;
-            int g = (int)(0xCC + t*(0xAA-0xCC));
-            int b = (int)(0x88 + t*(0xFF-0x88));
-            DrawableHelper.fill(matrices, px+i, py, px+i+1, py+40, 0xFF000000|(g<<8)|b);
+            int g = (int)(0xCC + t * (0xAA - 0xCC));
+            int b = (int)(0x88 + t * (0xFF - 0x88));
+            DrawableHelper.fill(matrices, px+i, py, px+i+1, py+40, 0xFF000000 | (g<<8) | b);
         }
         DrawableHelper.fill(matrices, px, py+40, px+PANEL_W, py+41, 0xFF00EEBB);
 
-        drawCenteredText(matrices, this.textRenderer, "§0§l  InfoClient",
-            this.width/2, py+10, 0xFFFFFF);
-        drawCenteredText(matrices, this.textRenderer, "§0Configuracion  |  §0§oPresa P para cerrar",
-            this.width/2, py+24, 0xFFFFFF);
-        drawCenteredText(matrices, this.textRenderer, "§7— Features —",
-            this.width/2, py+48, 0xFFFFFF);
+        drawCenteredText(matrices, this.textRenderer,
+            "§0§l  InfoClient", this.width/2, py+10, 0xFFFFFF);
+        drawCenteredText(matrices, this.textRenderer,
+            "§0Configuracion  |  §0§oPresa P para cerrar", this.width/2, py+24, 0xFFFFFF);
+        drawCenteredText(matrices, this.textRenderer,
+            "§7— Features —", this.width/2, py+48, 0xFFFFFF);
 
         int cpsLabelY = py + 60 + 30*3 - 11;
-        drawCenteredText(matrices, this.textRenderer, "§7Clicks Por Segundo",
-            this.width/2, cpsLabelY, 0xFFFFFF);
+        drawCenteredText(matrices, this.textRenderer,
+            "§7Clicks Por Segundo", this.width/2, cpsLabelY, 0xFFFFFF);
 
         this.textRenderer.drawWithShadow(matrices, "§8v1.0 · 1.18.2", px+6, py+PANEL_H-11, 0xFFFFFF);
         super.render(matrices, mouseX, mouseY, delta);

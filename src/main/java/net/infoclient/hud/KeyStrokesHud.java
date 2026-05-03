@@ -11,132 +11,86 @@ import net.minecraft.client.util.math.MatrixStack;
 @Environment(EnvType.CLIENT)
 public class KeyStrokesHud {
 
-    // Animación suave al presionar (fade in/out)
-    private static float wAlpha   = 0, aAlpha  = 0, sAlpha  = 0, dAlpha  = 0;
-    private static float lmbAlpha = 0, rmbAlpha = 0;
-    private static final float SPEED = 0.25f;
-
-    private static final int BOX   = 22;  // tamaño del cuadro en px
-    private static final int GAP   =  3;  // espacio entre cuadros
-    private static final int STEP  = BOX + GAP;
+    private static float wA=0, aA=0, sA=0, dA=0, lA=0, rA=0;
+    private static final float SP   = 0.25f;
+    private static final int   BOX  = 22;
+    private static final int   GAP  = 3;
+    private static final int   STEP = BOX + GAP;
 
     public static void render(MatrixStack matrices, float tickDelta) {
         if (!ModConfig.showKeyStrokes) return;
-
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
         int sw = client.getWindow().getScaledWidth();
         int sh = client.getWindow().getScaledHeight();
+        int ox = sw - STEP * 3 - 6;
+        int oy = sh - BOX  * 3 - GAP * 2 - 54;
 
-        // Posición: esquina inferior derecha, encima del hotbar
-        int originX = sw  - STEP * 3 - 6;
-        int originY = sh  - BOX  * 3 - GAP * 2 - 54;
+        boolean w = client.options.forwardKey.isPressed();
+        boolean a = client.options.leftKey.isPressed();
+        boolean s = client.options.backKey.isPressed();
+        boolean d = client.options.rightKey.isPressed();
+        boolean l = client.options.attackKey.isPressed();
+        boolean r = client.options.useKey.isPressed();
 
-        // Estado de las teclas
-        boolean w   = client.options.forwardKey.isPressed();
-        boolean a   = client.options.leftKey.isPressed();
-        boolean s   = client.options.backKey.isPressed();
-        boolean d   = client.options.rightKey.isPressed();
-        boolean lmb = client.options.attackKey.isPressed();
-        boolean rmb = client.options.useKey.isPressed();
+        wA = lerp(wA, w?1:0, SP);  aA = lerp(aA, a?1:0, SP);
+        sA = lerp(sA, s?1:0, SP);  dA = lerp(dA, d?1:0, SP);
+        lA = lerp(lA, l?1:0, SP);  rA = lerp(rA, r?1:0, SP);
 
-        // Actualizar animaciones
-        wAlpha   = lerp(wAlpha,   w   ? 1f : 0f, SPEED);
-        aAlpha   = lerp(aAlpha,   a   ? 1f : 0f, SPEED);
-        sAlpha   = lerp(sAlpha,   s   ? 1f : 0f, SPEED);
-        dAlpha   = lerp(dAlpha,   d   ? 1f : 0f, SPEED);
-        lmbAlpha = lerp(lmbAlpha, lmb ? 1f : 0f, SPEED);
-        rmbAlpha = lerp(rmbAlpha, rmb ? 1f : 0f, SPEED);
+        DrawableHelper.fill(matrices, ox-4, oy-4, ox+STEP*3+4, oy+STEP*3-GAP+4, 0xAA0d0d1a);
 
-        /*
-         *   Layout:
-         *       [ W ]
-         *   [A] [S] [D]
-         *   [LMB]  [RMB]
-         */
+        drawKey(matrices, client, ox+STEP,   oy,      "W", wA);
+        drawKey(matrices, client, ox,         oy+STEP, "A", aA);
+        drawKey(matrices, client, ox+STEP,   oy+STEP, "S", sA);
+        drawKey(matrices, client, ox+STEP*2, oy+STEP, "D", dA);
 
-        // Fondo del panel completo (3 columnas × 3 filas)
-        int px = originX - 4;
-        int py = originY - 4;
-        int pw = STEP * 3 + 4;
-        int ph = STEP * 3 - GAP + 4;
-        DrawableHelper.fill(matrices, px, py, px + pw, py + ph, 0xAA0d0d1a);
-
-        // Fila 1 — W centrado
-        drawKey(matrices, client, originX + STEP,       originY,          "W",   wAlpha);
-
-        // Fila 2 — A S D
-        drawKey(matrices, client, originX,              originY + STEP,   "A",   aAlpha);
-        drawKey(matrices, client, originX + STEP,       originY + STEP,   "S",   sAlpha);
-        drawKey(matrices, client, originX + STEP * 2,   originY + STEP,   "D",   dAlpha);
-
-        // Fila 3 — LMB RMB (doble ancho cada uno)
-        int mouseY = originY + STEP * 2;
-        int halfW  = STEP + BOX / 2;  // ancho de cada botón de ratón
-        drawMouseBtn(matrices, client, originX,          mouseY, halfW - GAP, "LMB", lmbAlpha, lmb, false);
-        drawMouseBtn(matrices, client, originX + halfW,  mouseY, halfW - GAP, "RMB", rmbAlpha, rmb, true);
+        int my = oy + STEP * 2;
+        int hw = STEP + BOX / 2;
+        drawMouse(matrices, client, ox,    my, hw-GAP, "LMB", lA, l, false);
+        drawMouse(matrices, client, ox+hw, my, hw-GAP, "RMB", rA, r, true);
     }
-
-    // ── Dibuja una tecla de movimiento ───────────────────────────────────────
 
     private static void drawKey(MatrixStack matrices, MinecraftClient client,
                                  int x, int y, String label, float alpha) {
-        // Color de fondo interpolado
-        int r = (int)(0x10 + alpha * (0x00 - 0x10));
-        int g = (int)(0x10 + alpha * (0xE0 - 0x10));
-        int b = (int)(0x20 + alpha * (0x70 - 0x20));
+        int r  = (int)(0x10 + alpha * (0x00 - 0x10));
+        int g  = (int)(0x10 + alpha * (0xE0 - 0x10));
+        int b  = (int)(0x20 + alpha * (0x70 - 0x20));
         int bg = 0xCC000000 | (r << 16) | (g << 8) | b;
-
-        // Borde (más brillante cuando se presiona)
-        int borderBrightness = (int)(0x33 + alpha * (0xCC));
-        int borderColor = 0xFF000000 | (0 << 16) | (borderBrightness << 8) | (borderBrightness / 2);
-
-        // Borde exterior
-        DrawableHelper.fill(matrices, x - 1, y - 1, x + BOX + 1, y + BOX + 1, borderColor);
-        // Fondo
-        DrawableHelper.fill(matrices, x, y, x + BOX, y + BOX, bg);
-
-        // Texto centrado
-        int tw = client.textRenderer.getWidth(label);
-        int tx = x + (BOX - tw) / 2;
-        int ty = y + (BOX - 8) / 2;
-        int textColor = alpha > 0.5f ? 0xFF111111 : 0xFFCCCCCC;
-        client.textRenderer.draw(matrices, label, tx, ty, textColor);
-    }
-
-    // ── Dibuja un botón de ratón ─────────────────────────────────────────────
-
-    private static void drawMouseBtn(MatrixStack matrices, MinecraftClient client,
-                                      int x, int y, int width, String label,
-                                      float alpha, boolean pressed, boolean isRight) {
-        int r  = (int)(0x10 + alpha * (isRight ? 0xE0 : 0x00));
-        int g  = (int)(0x10 + alpha * (isRight ? 0x50 : 0xE0));
-        int b  = (int)(0x20 + alpha * (isRight ? 0x00 : 0x70));
-        int bg = 0xCC000000 | (r << 16) | (g << 8) | b;
-
         int br = (int)(0x33 + alpha * 0xCC);
-        int borderColor = isRight
-                ? 0xFF000000 | (br << 16) | (br / 4 << 8) | 0
-                : 0xFF000000 | 0 | (br << 8) | (br / 2);
+        int border = 0xFF000000 | (br << 8) | (br / 2);
 
-        DrawableHelper.fill(matrices, x - 1, y - 1, x + width + 1, y + BOX + 1, borderColor);
-        DrawableHelper.fill(matrices, x,     y,     x + width,     y + BOX,     bg);
+        DrawableHelper.fill(matrices, x-1, y-1, x+BOX+1, y+BOX+1, border);
+        DrawableHelper.fill(matrices, x,   y,   x+BOX,   y+BOX,   bg);
 
-        // Etiqueta + CPS real si autoclicker activo y LMB
-        String display = label;
-        if (!isRight && ModConfig.autoClicker && pressed) {
-            display = AutoClicker.realCps + " CPS";
-        }
+        int tw = client.textRenderer.getWidth(label);
+        client.textRenderer.draw(matrices, label,
+                x + (BOX - tw) / 2f, y + (BOX - 8) / 2f,
+                alpha > 0.5f ? 0xFF111111 : 0xFFCCCCCC);
+    }
 
+    private static void drawMouse(MatrixStack matrices, MinecraftClient client,
+                                   int x, int y, int width, String label,
+                                   float alpha, boolean pressed, boolean right) {
+        int r  = (int)(0x10 + alpha * (right ? 0xE0 : 0x00));
+        int g  = (int)(0x10 + alpha * (right ? 0x50 : 0xE0));
+        int b  = (int)(0x20 + alpha * (right ? 0x00 : 0x70));
+        int bg = 0xCC000000 | (r << 16) | (g << 8) | b;
+        int br = (int)(0x33 + alpha * 0xCC);
+        int border = right
+                ? 0xFF000000 | (br << 16) | (br / 4 << 8)
+                : 0xFF000000 | (br << 8)  | (br / 2);
+
+        DrawableHelper.fill(matrices, x-1, y-1, x+width+1, y+BOX+1, border);
+        DrawableHelper.fill(matrices, x,   y,   x+width,   y+BOX,   bg);
+
+        String display = (!right && ModConfig.autoClicker && pressed)
+                ? AutoClicker.realCps + " CPS" : label;
         int tw = client.textRenderer.getWidth(display);
-        int tx = x + (width - tw) / 2;
-        int ty = y + (BOX - 8) / 2;
-        int textColor = alpha > 0.5f ? 0xFF111111 : 0xFFAAAAAA;
-        client.textRenderer.draw(matrices, display, tx, ty, textColor);
+        client.textRenderer.draw(matrices, display,
+                x + (width - tw) / 2f, y + (BOX - 8) / 2f,
+                alpha > 0.5f ? 0xFF111111 : 0xFFAAAAAA);
     }
 
-    private static float lerp(float a, float b, float t) {
-        return a + (b - a) * t;
-    }
+    private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 }

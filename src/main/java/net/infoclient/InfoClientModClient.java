@@ -24,7 +24,6 @@ public class InfoClientModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 
-        // Tecla P -> menu de configuracion
         openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.infoclient.menu",
                 InputUtil.Type.KEYSYM,
@@ -32,7 +31,6 @@ public class InfoClientModClient implements ClientModInitializer {
                 "category.infoclient"
         ));
 
-        // Tecla F4 -> toggle rapido del HUD
         toggleHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.infoclient.toggle",
                 InputUtil.Type.KEYSYM,
@@ -41,7 +39,6 @@ public class InfoClientModClient implements ClientModInitializer {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            // Abrir/cerrar menu con P
             while (openMenuKey.wasPressed()) {
                 if (client.currentScreen == null) {
                     client.setScreen(new SettingsScreen(null));
@@ -49,17 +46,12 @@ public class InfoClientModClient implements ClientModInitializer {
                     client.setScreen(null);
                 }
             }
-
-            // Toggle HUD con F4
             while (toggleHudKey.wasPressed()) {
                 ModConfig.showHud = !ModConfig.showHud;
             }
-
-            // AutoClicker tick
             AutoClicker.onTick(client);
         });
 
-        // Registrar HUD
         HudRenderCallback.EVENT.register((matrices, tickDelta) -> {
             InfoHud.render(matrices, tickDelta);
             KeyStrokesHud.render(matrices, tickDelta);

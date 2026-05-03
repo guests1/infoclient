@@ -7,7 +7,9 @@ version = project.mod_version
 group   = project.maven_group
 
 repositories {
-    // Add repos here if you need extra libraries
+    maven { url 'https://maven.fabricmc.net/' }
+    maven { url 'https://libraries.minecraft.net/' }
+    mavenCentral()
 }
 
 dependencies {
